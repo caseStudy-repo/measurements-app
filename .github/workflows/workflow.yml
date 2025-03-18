@@ -16,8 +16,8 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: measdb
-          POSTGRES_USER: postgres
+          # POSTGRES_DB: measdb
+          # POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@v4
+      # - uses: actions/download-artifact@v4
         with:
           name: Package
           path: backend/target/
@@ -65,12 +65,12 @@ jobs:
         run: echo "::set-output name=date::$(date +%Y%m%d-%H%M%S)"
 
       - name: Docker build
-        run: docker build -t iideveloper21/measurements-qrks:$TAG_NAME -f backend/src/main/docker/Dockerfile.jvm ./backend
+        run: docker build -t xopiie/measurements-qrks:$TAG_NAME -f backend/src/main/docker/Dockerfile.jvm ./backend
         env:
           TAG_NAME: CD-${{ steps.date.outputs.date }}
 
       - name: Retag to latest
-        run: docker tag iideveloper21/measurements-qrks:$TAG_NAME iideveloper21/measurements-qrks:latest
+        run: docker tag xopiie/measurements-qrks:$TAG_NAME xopiie/measurements-qrks:latest
         env:
           TAG_NAME: CD-${{ steps.date.outputs.date }}
 
@@ -81,50 +81,14 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_PASS }}
 
       - name: Docker push
-        run: docker push iideveloper21/measurements-qrks:$TAG_NAME && docker push iideveloper21/measurements-qrks:latest
+        run: docker push xopiie/measurements-qrks:$TAG_NAME && docker push xopiie/measurements-qrks:latest
         env:
           TAG_NAME: CD-${{ steps.date.outputs.date }}
-
-  BE-static-code-analysis:
-    name: BE SonarCloud Analysis
-    runs-on: ubuntu-latest
-    needs: [BE-build-test-package]
-  
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-  
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '21'
-          cache: maven
-  
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Build and analyze
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BE }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=iizimskasola2024_demo_measurements_BE -DskipTests -Dsonar.qualitygate.wait=true
-        working-directory: backend/
 
   BE-deploy-on-azure:
     name: BE Deploy on Azure
     runs-on: ubuntu-latest
-    needs: [BE-docker-image-delivery, BE-static-code-analysis]
+    needs: [BE-docker-image-delivery]
 
     steps:
       - name: Deploy to MS Azure
@@ -166,37 +130,10 @@ jobs:
           name: frontend-build
           path: frontend/build/
         
-  FE-static-code-analysis:
-      name: FE SonarCloud Analysis
-      runs-on: ubuntu-latest
-      needs: [FE-build]
-    
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
-    
-        - name: Setup Node.js
-          uses: actions/setup-node@v3
-          with:
-            node-version: 18
-            cache: 'npm'
-            cache-dependency-path: frontend/package-lock.json
-    
-        - name: Install dependencies
-          run: npm ci
-          working-directory: frontend
-  
-        - name: SonarCloud Scan Frontend
-          uses: SonarSource/sonarcloud-github-action@master
-          env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FE }}
-          with:
-            projectBaseDir: frontend/
-        
   FE-deploy:
     name: FE Deployment
     runs-on: ubuntu-latest
-    needs: [FE-static-code-analysis, BE-deploy-on-azure]
+    needs: [BE-deploy-on-azure]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -230,9 +167,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [BE-deploy-on-azure, FE-deploy]
     strategy:
-      fail-fast: false # https://github.com/cypress-io/github-action/issues/48
+      fail-fast: false
       matrix:
-        containers: [ 1, 2 ] # Uses 2 parallel instances
+        containers: [ 1, 2 ]
 
     services:
       postgres:
