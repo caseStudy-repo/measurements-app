@@ -65,7 +65,7 @@ jobs:
         run: echo "::set-output name=date::$(date +%Y%m%d-%H%M%S)"
 
       - name: Docker build
-        run: docker build -t xopiie/measurements-qrks:$TAG_NAME -f backend/src/main/docker/Dockerfile.jvm ./backend
+        run: docker build -t xopiie/measurements-qrks:$TAG_NAME -f ./backend/src/main/docker/Dockerfile.jvm ./backend
         env:
           TAG_NAME: CD-${{ steps.date.outputs.date }}
 
