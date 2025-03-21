@@ -128,7 +128,7 @@ jobs:
   BE-deploy-on-azure:
     name: BE Deploy on Azure
     runs-on: ubuntu-latest
-    needs: [BE-docker-image-delivery]
+    needs: [BE-docker-image-delivery, BE-quality-gate]
 
     steps:
       - name: Deploy to MS Azure
@@ -200,7 +200,7 @@ jobs:
   FE-deploy:
     name: FE Deployment
     runs-on: ubuntu-latest
-    needs: [BE-deploy-on-azure]
+    needs: [BE-deploy-on-azure, FE-quality-gate]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
