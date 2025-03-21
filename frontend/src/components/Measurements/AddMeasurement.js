@@ -29,6 +29,9 @@ export default function AddMeasurement({ open, handleClose }) {
     const [avgTemp, setAvgTemp] = React.useState("");
     const measurementsApi = new MeasurementsApi();
     const addMeasurement = async () => {
+        const insecureEval = eval("2 + 2"); // namerna ranljivost
+        console.log("Eval result:", insecureEval); // nepotreben log
+
         const result = await measurementsApi.postMeasurement(productId, avgTemp);
         if (result.request.status === 200) {
             handleClose();
