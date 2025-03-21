@@ -85,6 +85,42 @@ jobs:
         env:
           TAG_NAME: CD-${{ steps.date.outputs.date }}
 
+  BE-quality-gate:
+    name: BE SonarCloud Quality Gate
+    runs-on: ubuntu-latest
+    needs: [BE-build-test-package]
+  
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+  
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '21'
+          cache: maven
+  
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BE }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=iizimskasola2024_demo_measurements_BE -DskipTests -Dsonar.qualitygate.wait=true
+        working-directory: backend/
+
   BE-deploy-on-azure:
     name: BE Deploy on Azure
     runs-on: ubuntu-latest
@@ -129,6 +165,33 @@ jobs:
         with:
           name: frontend-build
           path: frontend/build/
+
+  FE-quality-gate:
+      name: FE SonarCloud Quality Gate
+      runs-on: ubuntu-latest
+      needs: [FE-build]
+    
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v3
+    
+        - name: Setup Node.js
+          uses: actions/setup-node@v3
+          with:
+            node-version: 18
+            cache: 'npm'
+            cache-dependency-path: frontend/package-lock.json
+    
+        - name: Install dependencies
+          run: npm ci
+          working-directory: frontend
+  
+        - name: SonarCloud Scan Frontend
+          uses: SonarSource/sonarcloud-github-action@master
+          env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FE }}
+          with:
+            projectBaseDir: frontend/
         
   FE-deploy:
     name: FE Deployment
