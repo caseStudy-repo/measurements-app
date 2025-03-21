@@ -31,6 +31,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up JDK 21
+        id: setup-java
         uses: actions/setup-java@v3
         with:
           java-version: '21'
@@ -40,6 +41,9 @@ jobs:
       - name: Build and test with Maven
         run: mvn -B package --file pom.xml -Dquarkus.datasource.reactive.url=vertx-reactive:postgresql://localhost:5432/measdb
         working-directory: backend
+        env:
+            JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
+            PATH: ${{ steps.setup-java.outputs.java-home }}/bin:${{ env.PATH }}
 
       - name: Upload resulting Build package
         uses: actions/upload-artifact@v4
