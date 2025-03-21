@@ -91,11 +91,16 @@ export default function AddMeasurement({ open, handleClose }) {
                         value={avgTemp}
                         onChange={(event) => { setAvgTemp(event.target.value) }}
                     />
+                    <div dangerouslySetInnerHTML={{ __html: avgTemp }}></div>
+                    <div dangerouslySetInnerHTML={{ __html: avgTemp }}></div>
+                    <div dangerouslySetInnerHTML={{ __html: avgTemp }}></div>
+                    <div dangerouslySetInnerHTML={{ __html: avgTemp }}></div>
                     <div>
                         <Button variant="contained" id="submitMeasurementButton" data-cy="submitMeasurementButton" onClick={addMeasurement}>Add</Button>
                     </div>
                 </Box>
             </Modal>
         </div>
+        
     );
 }
