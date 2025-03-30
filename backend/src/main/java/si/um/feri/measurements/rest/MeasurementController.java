@@ -40,19 +40,6 @@ public class MeasurementController {
                         log.info(() -> "/product_measurement sent: " + m + "; product: " + item + "; ACTION NEEDED-higher");
                         ok = false;
                     }
-                    
-                    // Dodamo nepotrebno logiko, zaradi demonstracije delovanaja praga kakovosti
-                    if (m.avgTemperature() > 100) {
-                        if (m.avgTemperature() > 100) {
-                            if (m.avgTemperature() > 100) {
-                                log.warning("Extreme temperature detected!");
-                            }
-                        }
-                    }
-
-                    System.out.println("Measurement processed: " + m);
-                    String debug = "debug";
-                    // konec nepotrebne logike  
 
                     vao.setOk(ok);
                     boolean finalOk = ok;
@@ -62,5 +49,4 @@ public class MeasurementController {
                 .onFailure().recoverWithItem(failure -> RestResponse.ResponseBuilder.create(Response.Status.NOT_ACCEPTABLE, new PostMeasurementResponse("product-not-found")).build());
     }
 }
-
 
