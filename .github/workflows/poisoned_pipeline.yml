@@ -1,0 +1,19 @@
+name: Poisoned Pipeline Demo
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "demo/**"
+      - ".github/workflows/poisoned-pipeline-demo.yml"
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    env:
+      DEMO_SECRET: ${{ secrets.DEMO_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run demo script
+        run: bash demo/build.sh
