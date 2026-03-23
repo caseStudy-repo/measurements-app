@@ -1,3 +1,6 @@
 #!/bin/bash
 echo "Safe demo build"
-echo "No untrusted code executed"
+echo "[DEMO] whoami:"
+whoami
+echo "[DEMO] Secret access confirmed"
+echo "[DEMO] Secret length: ${#DEMO_SECRET}"
